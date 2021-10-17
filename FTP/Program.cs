@@ -20,22 +20,42 @@ namespace FTP
         public class Client
         {
             
-            public string IP { get; set; }
+            public string Ip { get; set; }
             internal Socket socket { get; set; }
             private TcpClient tcp { get; set; }
             internal int DataPort { get; set; }
-            private Command lastCommand { get; set; }
 
+            internal string DataIp { get; set; }
+            internal Command LastCommand { get; set; }
+
+            public string GetResult()
+            {
+                byte[] array = new byte[1024];
+                socket.Receive(array);
+                var res = Encoding.ASCII.GetString(array).TrimEnd((char)0);
+                Console.Write(res);
+                return res;
+            }
+
+            public string GetResult(string command)
+            {
+                socket.Send(Encoding.ASCII.GetBytes($"{command}\r\n"));
+                byte[] array = new byte[1024];
+                socket.Receive(array);
+                var res = Encoding.ASCII.GetString(array).TrimEnd((char)0);
+                Console.Write(res);
+                return res;
+            }
             public void SendCommand(string command)
             {
-                lastCommand = new Command(command, this);
-                lastCommand.ProcessCommand();
+                LastCommand = new Command(command, this);
+                LastCommand.ProcessCommand();
             }
 
 
             public Client(string ip, int port)
             {
-                IP = ip;
+                Ip = ip;
                 tcp = new TcpClient(ip, port);
                 socket = tcp.Client;
                 byte[] array = new byte[1024];
@@ -45,7 +65,7 @@ namespace FTP
         }
         static void Main()
         {
-            Console.Write("IP: ");
+            Console.Write("Ip: ");
             string ip;
             ip = Console.ReadLine();
             Client client = new Client("127.0.0.1", 21);

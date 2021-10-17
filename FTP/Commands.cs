@@ -12,7 +12,7 @@ namespace FTP
 {
     public enum CommandType
     {
-        Pasv,
+        Passive,
         FileTransfer,
         Data,
         Custom,
@@ -36,12 +36,8 @@ namespace FTP
     {
         public void ProcessCommand(Program.Client client, string response)
         {
-            if (response[0] == '4' || response[0] == '5')
-            {
-                Console.WriteLine("Client: Server error");
-                return;
-            }
-            TcpClient tcp = new TcpClient(client.IP, client.DataPort);
+           
+            TcpClient tcp = new TcpClient(client.DataIp, client.DataPort);
             using (var stream = tcp.GetStream())
             {
                 var buffer = new byte[1024];
@@ -53,12 +49,10 @@ namespace FTP
                     Console.Write(Encoding.ASCII.GetString(buffer).TrimEnd((char)0));
                 } while (readed == buffer.Length);
             }
-            byte[] array = new byte[1024];
-            client.socket.Receive(array);
-            Console.Write(Encoding.ASCII.GetString(array).TrimEnd((char)0));
+            client.GetResult();
         }
     }
-    class PasvStrategy : ICommandStrategy
+    class PassiveStrategy : ICommandStrategy
     {
         public void ProcessCommand(Program.Client client, string response)
         {
@@ -69,10 +63,22 @@ namespace FTP
                 throw new ExternalException("Wrong server response");
             }
 
-            var args = response.Substring(startIndex + 1, endIndex - startIndex - 1).Split(',');
-            int port = Int32.Parse(args[4]) * 256 + Int32.Parse(args[5]);
+            var args = response.Substring(startIndex + 1, endIndex - startIndex - 1).Split(',', '|');
+            int port;
+            string ip = client.Ip;
+            if (client.LastCommand.RawCommand == "pasv")
+            {
+                port = Int32.Parse(args[4]) * 256 + Int32.Parse(args[5]);
+                ip = string.Format("{0}.{1}.{2}.{3}", args[0], args[1], args[2], args[3]);
+            }
+            else
+            {
+                port = Int32.Parse(args[3]);
+            }
+            client.DataIp = ip;
             client.DataPort = port;
-            Console.WriteLine($"Client: Setting port to {port}");
+
+            Console.WriteLine($"Client: Setting data transfer ip to {ip}:{port}");
         }
     }
 
@@ -80,35 +86,31 @@ namespace FTP
     {
         private ICommandStrategy commandStrategy;
 
-        private readonly string rawCommand;
+        internal readonly string RawCommand;
 
         private Program.Client client;
 
-        string GetResult()
-        {
-            byte[] array = new byte[1024];
-            client.socket.Receive(array);
-            var res = Encoding.ASCII.GetString(array).TrimEnd((char)0);
-            
-            Console.Write(res);
-            return res;
-        }
+       
 
         public void ProcessCommand()
         {
-            client.socket.Send(Encoding.ASCII.GetBytes($"{rawCommand}\r\n"));
-            var response = GetResult();
+            var response = client.GetResult(RawCommand);
+            if (response[0] == '4' || response[0] == '5')
+            {
+                Console.WriteLine("Client: Server error");
+                return;
+            }
             commandStrategy.ProcessCommand(client, response);
         }
         public Command(string command, Program.Client client)
         {
-            rawCommand = command;
+            RawCommand = command.ToLower();
             this.client = client;
 
             switch (command.GetCommandType())
             {
-                case CommandType.Pasv:
-                    commandStrategy = new PasvStrategy();
+                case CommandType.Passive:
+                    commandStrategy = new PassiveStrategy();
                     break;
                 case CommandType.Data:
                     commandStrategy = new DataStrategy();
@@ -126,13 +128,16 @@ namespace FTP
             switch (command.ToLower())
             {
                 case "pasv":
-                    return CommandType.Pasv;
+                case "epsv":
+                    return CommandType.Passive;
                 case "list":
                     return CommandType.Data;
                 default:
                     return CommandType.Other;
             }
         }
-        
+
+       
+
     }
 }
