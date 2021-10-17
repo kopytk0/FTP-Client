@@ -68,7 +68,7 @@ namespace FTP
             Console.Write("Ip: ");
             string ip;
             ip = Console.ReadLine();
-            Client client = new Client("127.0.0.1", 21);
+            Client client = new Client(ip, 21);
             while (true)
             {
                 string command = Console.ReadLine();
