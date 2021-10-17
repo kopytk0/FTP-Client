@@ -40,11 +40,7 @@ namespace FTP
             public string GetResult(string command)
             {
                 socket.Send(Encoding.ASCII.GetBytes($"{command}\r\n"));
-                byte[] array = new byte[1024];
-                socket.Receive(array);
-                var res = Encoding.ASCII.GetString(array).TrimEnd((char)0);
-                Console.Write(res);
-                return res;
+                return GetResult();
             }
             public void SendCommand(string command)
             {
