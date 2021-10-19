@@ -33,6 +33,10 @@ namespace FTP
                 byte[] array = new byte[1024];
                 socket.Receive(array);
                 var res = Encoding.ASCII.GetString(array).TrimEnd((char)0);
+                if (res[0] == '4' || res[0] == '5')
+                {
+                    Console.WriteLine("Client: Server error");
+                }
                 Console.Write(res);
                 return res;
             }

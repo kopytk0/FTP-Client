@@ -95,11 +95,7 @@ namespace FTP
         public void ProcessCommand()
         {
             var response = client.GetResult(RawCommand);
-            if (response[0] == '4' || response[0] == '5')
-            {
-                Console.WriteLine("Client: Server error");
-                return;
-            }
+            
             commandStrategy.ProcessCommand(client, response);
         }
         public Command(string command, Program.Client client)
@@ -121,23 +117,5 @@ namespace FTP
             }
         }
     }
-    public static class CommandHelper
-    {
-        public static CommandType GetCommandType(this string command)
-        {
-            switch (command.ToLower())
-            {
-                case "pasv":
-                case "epsv":
-                    return CommandType.Passive;
-                case "list":
-                    return CommandType.Data;
-                default:
-                    return CommandType.Other;
-            }
-        }
-
-       
-
-    }
+    
 }
