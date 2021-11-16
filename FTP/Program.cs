@@ -17,8 +17,8 @@ namespace FTP
         static void Main()
         {
             Console.Write("Ip: ");
-            string ip;
-            ip = Console.ReadLine();
+            string ip = "127.0.0.1";
+            //ip = Console.ReadLine();
             Client client = new Client(ip, 21);
             client.Login("local", "12345");
             var tmp = client.ListFiles("\\");
