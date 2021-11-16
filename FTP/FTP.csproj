@@ -43,8 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandHelper.cs" />
-    <Compile Include="Commands.cs" />
+    <Compile Include="Client.cs" />
+    <Compile Include="FtpConnection.cs" />
+    <Compile Include="FtpException.cs" />
     <Compile Include="FTPResponse.cs" />
     <Compile Include="FTPResponseHelper.cs" />
     <Compile Include="Program.cs" />
