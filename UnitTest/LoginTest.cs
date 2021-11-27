@@ -31,7 +31,7 @@ namespace UnitTest
             mockConnection.Setup((x) => x.SendRequest(It.IsAny<string>())).Returns(new FtpResponse(500, "NOT OK"));
             var client = new Client(mockConnection.Object);
 
-            var ex = Assert.ThrowsException<AuthenticationException>(() => client.Login("michaldworczyk", "12345"));
+            var ex = Assert.ThrowsException<FtpException>(() => client.Login("michaldworczyk", "12345"));
         }
     }
 }

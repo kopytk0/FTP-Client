@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Client.cs" />
     <Compile Include="FtpConnection.cs" />
+    <Compile Include="FtpEntry.cs" />
     <Compile Include="FtpException.cs" />
     <Compile Include="FTPResponse.cs" />
     <Compile Include="FTPResponseHelper.cs" />

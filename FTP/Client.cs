@@ -35,22 +35,27 @@ namespace FTP
 
         private IPEndPoint GetDataTransferIP()
         {
-            ftpConnection.SendRequest("PASV");
-            return ftpConnection.ReceiveResponse().ParsePasv();
+            return ftpConnection.SendRequest("PASV").ParsePasv();
         }
-        public List<string> ListFiles(string path)
+        public List<FtpEntry> ListFiles(string path)
         {
+            
             var endPoint = GetDataTransferIP();
-            ftpConnection.SendRequest("LIST");
-            ftpConnection.ReceiveResponse();
-            var stream = ftpConnection.ReceiveDataStream(endPoint);
+            ftpConnection.SendRequest("MLSD");
+            using (var stream = ftpConnection.ReceiveDataStream(endPoint))
+            {
+                using (StreamReader reader = new StreamReader(stream))
+                {
 
-            StreamReader reader = new StreamReader(stream);
-
-            return reader.ReadToEnd().Split('\n').ToList();
-
-           
+                    var rawList = reader.ReadToEnd().Split('\n').Select(x => x.TrimEnd('\r'))
+                        .SkipWhile(string.IsNullOrWhiteSpace).ToList();
+                    return rawList.Select(x => FtpEntry.Parse(x)).ToList();
+                }
             }
+           
+
+            return null;
+        }
         public Client(string ip, int port = 21)
         {
             Ip = ip;

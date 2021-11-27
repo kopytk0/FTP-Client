@@ -25,7 +25,7 @@ namespace FTP
 
         public NetworkStream ReceiveDataStream(IPEndPoint endPoint)
         {
-            TcpClient tcpClient = new TcpClient(endPoint);
+            TcpClient tcpClient = new TcpClient(endPoint.Address.ToString(), endPoint.Port);
             return tcpClient.GetStream();
         }
         public FtpResponse ReceiveResponse()
