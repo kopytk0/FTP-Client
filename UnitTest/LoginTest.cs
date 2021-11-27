@@ -18,9 +18,10 @@ namespace UnitTest
         {
             var mockConnection = new Mock<IFtpConnection>();
             mockConnection.Setup((x) => x.SendRequest(It.Is<string>(y => y.StartsWith("user", StringComparison.OrdinalIgnoreCase)))).Returns(new FtpResponse(200, "OKOK"));
+            mockConnection.Setup(x => x.SendRequest(It.Is<string>(y => y.StartsWith("pass", StringComparison.OrdinalIgnoreCase)))).Returns(new FtpResponse(200, "OK"));
             var client = new Client(mockConnection.Object);
 
-            client.Login("michaldworczyk", "12345");
+            Assert.IsTrue(client.Login("michaldworczyk", "12345").IsSuccess());
             
         }
 

@@ -55,7 +55,9 @@ namespace FTP
                         UInt64.TryParse(value, out fileSize);
                         break;
                     case "modify":
-                        modifyDate = DateTime.ParseExact(value, "yyyyMMddHHmmss", new DateTimeFormatInfo());
+                        var dotIndex = value.IndexOf('.');
+                        value = dotIndex >= 0 ? value.Substring(0, dotIndex) : value;
+                        DateTime.TryParseExact(value, "yyyyMMddHHmmss", new DateTimeFormatInfo(), DateTimeStyles.None, out modifyDate); //"yyyyMMddHHmmss"
                         break;
                     case "type":
                         type = value == "file" ? EntryType.File : (value == "dir" ? EntryType.Directory : EntryType.Unknown);

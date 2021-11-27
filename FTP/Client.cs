@@ -17,7 +17,7 @@ namespace FTP
         internal IPEndPoint DataEndPoint { get; set; }
 
 
-        public void Login(string username, string password = "")
+        public FtpResponse Login(string username, string password = "")
         {
 
             var response = ftpConnection.SendRequest($"USER {username}");
@@ -31,6 +31,8 @@ namespace FTP
             {
                 throw new FtpException("pass failed", response);
             }
+
+            return response;
         }
 
         private IPEndPoint GetDataTransferIP()
