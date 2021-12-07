@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -13,11 +12,9 @@ namespace FTP
         FtpResponse SendRequest(params string[] request);
         NetworkStream ReceiveDataStream(IPEndPoint endPoint);
     }
+
     public class FtpConnection : IFtpConnection
     {
-        private Socket socket { get; set; }
-        private TcpClient Tcp { get; set; }
-
         public FtpConnection(string host, int port = 21)
         {
             Tcp = new TcpClient(host, port);
@@ -25,15 +22,19 @@ namespace FTP
             ReceiveResponse();
         }
 
+        private Socket socket { get; }
+        private TcpClient Tcp { get; }
+
         public NetworkStream ReceiveDataStream(IPEndPoint endPoint)
         {
-            TcpClient tcpClient = new TcpClient(endPoint.Address.ToString(), endPoint.Port);
+            var tcpClient = new TcpClient(endPoint.Address.ToString(), endPoint.Port);
             return tcpClient.GetStream();
         }
+
         public FtpResponse ReceiveResponse()
         {
-            byte[] array = new byte[1024];
-            StringBuilder stringBuilder = new StringBuilder();
+            var array = new byte[1024];
+            var stringBuilder = new StringBuilder();
             int received;
             do
             {
@@ -53,9 +54,10 @@ namespace FTP
 
             return ReceiveResponse();
         }
+
         public FtpResponse SendRequest(params string[] request)
         {
-            return this.SendRequest(string.Join(" ", request));
+            return SendRequest(string.Join(" ", request));
         }
     }
 }

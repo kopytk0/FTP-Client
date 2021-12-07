@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace FTP
 {
@@ -18,33 +13,35 @@ namespace FTP
             Unknown
         }
 
-        public EntryType Type { get; private set; }
-        public DateTime ModifyDate { get; private set; }
-        public string Name { get; private set; }
-        public string FullPath { get; private set; }
-        public ulong FileSize { get; private set; }
-
         internal FtpEntry(EntryType type, DateTime creationDate, string fullPath, ulong fileSize)
         {
             Type = type;
             ModifyDate = creationDate;
             FullPath = fullPath;
             FileSize = fileSize;
-            var indyk= FullPath.LastIndexOf('\\');
+            var indyk = FullPath.LastIndexOf('\\');
             Name = indyk < 0 ? FullPath : FullPath.Substring(indyk + 1);
         }
+
+        public EntryType Type { get; }
+        public DateTime ModifyDate { get; }
+        public string Name { get; }
+        public string FullPath { get; }
+        public ulong FileSize { get; }
 
         internal static FtpEntry Parse(string rawData, string parent = "")
         {
             var fileIndex = rawData.IndexOf("; ");
-            var fileName = fileIndex >= 0 ? rawData.Substring(fileIndex + 2) : throw new Exception("Wrong server response");
+            var fileName = fileIndex >= 0
+                ? rawData.Substring(fileIndex + 2)
+                : throw new Exception("Wrong server response");
 
             var list = rawData.Substring(0, fileIndex).Split(';');
-            UInt64 fileSize = 0;
-            DateTime modifyDate = DateTime.MinValue;
-            EntryType type = EntryType.Unknown;
+            ulong fileSize = 0;
+            var modifyDate = DateTime.MinValue;
+            var type = EntryType.Unknown;
 
-            foreach(var item in list)
+            foreach (var item in list)
             {
                 var index = item.IndexOf('=');
                 var factType = item.Substring(0, index);
@@ -52,7 +49,7 @@ namespace FTP
                 switch (factType.ToLower())
                 {
                     case "size":
-                        UInt64.TryParse(value, out fileSize);
+                        ulong.TryParse(value, out fileSize);
                         break;
                     case "modify":
                         var dotIndex = value.IndexOf('.');
@@ -60,10 +57,10 @@ namespace FTP
                         modifyDate = ParseMlsdDate(value);
                         break;
                     case "type":
-                        type = value == "file" ? EntryType.File : (value == "dir" ? EntryType.Directory : EntryType.Unknown);
+                        type = value == "file" ? EntryType.File :
+                            value == "dir" ? EntryType.Directory : EntryType.Unknown;
                         break;
                 }
-
             }
 
             return new FtpEntry(type, modifyDate, Path.Combine(parent, fileName), fileSize);
