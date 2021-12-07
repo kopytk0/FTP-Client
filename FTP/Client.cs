@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Configuration;
 using System.Net.Sockets;
+using System.Security;
 using System.Text;
 
 namespace FTP
@@ -16,34 +17,62 @@ namespace FTP
         public string Ip { get; set; }
         internal IPEndPoint DataEndPoint { get; set; }
 
+        public void GetFile(string ftpPath, string localPath)
+        {
+            var endPoint = GetDataTransferIP();
+            var response = ftpConnection.SendRequest(Consts.Commands.GetFile, ftpPath);
+
+            if (response.IsSuccess())
+            {
+                using (var stream = ftpConnection.ReceiveDataStream(endPoint))
+                {
+                    using (var fileStream = File.Create(localPath))
+                    {
+                        stream.CopyTo(fileStream);
+                    }
+                }
+
+                response = ftpConnection.ReceiveResponse();
+            }
+
+            if (!response.IsSuccess())
+            {
+                throw new FtpException(response);
+            }
+            
+        }
 
         public FtpResponse Login(string username, string password = "")
         {
 
-            var response = ftpConnection.SendRequest($"USER {username}");
+            var response = ftpConnection.SendRequest(Consts.Commands.Login, username);
             if (!response.IsSuccess())
             {
                 throw new FtpException("login failed", response);
             }
             
-            response = ftpConnection.SendRequest($"PASS {password}");
+            response = ftpConnection.SendRequest(Consts.Commands.Password, password);
             if (!response.IsSuccess())
             {
                 throw new FtpException("pass failed", response);
             }
-
             return response;
+        }
+
+        public FtpResponse Login(string username, SecureString password)
+        {
+            return this.Login(username, password.ConvertToString());
         }
 
         private IPEndPoint GetDataTransferIP()
         {
-            return ftpConnection.SendRequest("PASV").ParsePasv();
+            return ftpConnection.SendRequest(Consts.Commands.Passive).ParsePasv();
         }
         public List<FtpEntry> ListFiles(string path)
         {
             
             var endPoint = GetDataTransferIP();
-            ftpConnection.SendRequest("MLSD");
+            ftpConnection.SendRequest(Consts.Commands.List);
             using (var stream = ftpConnection.ReceiveDataStream(endPoint))
             {
                 using (StreamReader reader = new StreamReader(stream))
@@ -54,8 +83,7 @@ namespace FTP
                     return rawList.Select(x => FtpEntry.Parse(x)).ToList();
                 }
             }
-           
-
+            
             return null;
         }
         public Client(string ip, int port = 21)

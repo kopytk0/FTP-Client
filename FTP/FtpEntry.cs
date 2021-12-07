@@ -57,7 +57,7 @@ namespace FTP
                     case "modify":
                         var dotIndex = value.IndexOf('.');
                         value = dotIndex >= 0 ? value.Substring(0, dotIndex) : value;
-                        DateTime.TryParseExact(value, "yyyyMMddHHmmss", new DateTimeFormatInfo(), DateTimeStyles.None, out modifyDate); //"yyyyMMddHHmmss"
+                        modifyDate = ParseMlsdDate(value);
                         break;
                     case "type":
                         type = value == "file" ? EntryType.File : (value == "dir" ? EntryType.Directory : EntryType.Unknown);
@@ -66,10 +66,15 @@ namespace FTP
 
             }
 
-            
-            
             return new FtpEntry(type, modifyDate, Path.Combine(parent, fileName), fileSize);
         }
 
+        private static DateTime ParseMlsdDate(string value)
+        {
+            DateTime modifyDate;
+            DateTime.TryParseExact(value, "yyyyMMddHHmmss", new DateTimeFormatInfo(), DateTimeStyles.None,
+                out modifyDate); //"yyyyMMddHHmmss"
+            return modifyDate;
+        }
     }
 }

@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
+    <Compile Include="Consts.cs" />
     <Compile Include="FtpConnection.cs" />
     <Compile Include="FtpEntry.cs" />
     <Compile Include="FtpException.cs" />
@@ -51,6 +52,7 @@
     <Compile Include="FTPResponseHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SecurityHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

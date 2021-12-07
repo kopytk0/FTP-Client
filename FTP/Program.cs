@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
+using System.Security;
 using Microsoft.CSharp.RuntimeBinder;
 
 namespace FTP
@@ -20,8 +21,14 @@ namespace FTP
             string ip = "127.0.0.1";
             //ip = Console.ReadLine();
             Client client = new Client(ip, 21);
-            client.Login("local", "12345");
-            var tmp = client.ListFiles("\\");
+            var pass = new SecureString();
+            pass.AppendChar('1');
+            pass.AppendChar('2');
+            pass.AppendChar('3');
+            pass.AppendChar('4');
+            pass.AppendChar('5');
+            client.Login("local", pass);
+            client.GetFile(@"/plik.txt", @"C:\Users\jakub\Desktop\MemTest\plik.txt");
             /*while (true)
             {
                 string command = Console.ReadLine();

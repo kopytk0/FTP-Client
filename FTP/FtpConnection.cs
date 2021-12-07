@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -9,6 +10,7 @@ namespace FTP
     {
         FtpResponse ReceiveResponse();
         FtpResponse SendRequest(string request);
+        FtpResponse SendRequest(params string[] request);
         NetworkStream ReceiveDataStream(IPEndPoint endPoint);
     }
     public class FtpConnection : IFtpConnection
@@ -50,6 +52,10 @@ namespace FTP
             Trace.WriteLineIf(!request.StartsWith("PASS"), request);
 
             return ReceiveResponse();
+        }
+        public FtpResponse SendRequest(params string[] request)
+        {
+            return this.SendRequest(string.Join(" ", request));
         }
     }
 }
