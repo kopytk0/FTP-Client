@@ -15,6 +15,8 @@ namespace FTP
             public const string List = "MLSD";
             public const string GetFile = "RETR";
             public const string Login = "USER";
+            public const string Close = "QUIT";
+            public const string SendFile = "STOR";
         }
     }
 }

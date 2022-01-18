@@ -31,6 +31,11 @@ namespace FTP
 
         internal static FtpEntry Parse(string rawData, string parent = "")
         {
+            if (String.IsNullOrEmpty(rawData))
+            {
+                return null;
+            }
+
             var fileIndex = rawData.IndexOf("; ");
             var fileName = fileIndex >= 0
                 ? rawData.Substring(fileIndex + 2)
